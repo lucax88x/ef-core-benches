@@ -4,7 +4,7 @@ namespace Benchmarks.Console;
 
 public class SampleDbContext : DbContext
 {
-    public DbSet<Thing> Things { get; set; }
+    public DbSet<Thing> things { get; set; }
 
     public SampleDbContext(DbContextOptions<SampleDbContext> dbContextOptions)
         : base(dbContextOptions)

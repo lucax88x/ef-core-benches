@@ -1,5 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Benchmarks.Console.Sqlite;
+using Benchmarks.Console.Npgsql;
 using Microsoft.EntityFrameworkCore;
 
 namespace Benchmarks.Console.Npgsql;
@@ -9,24 +9,26 @@ public class NpgsqlEFBenchmark
 {
     private string _databaseName;
 
-    private DbContextOptions<SampleDbContext> _dbContextOptions;
+    private DbContextOptions<SampleDbContext>? _dbContextOptions;
 
     [IterationSetup]
     public void CreateDatabase()
     {
-        _databaseName = $"{Guid.NewGuid():N}.db";
+        _databaseName = $"benchmark_{Guid.NewGuid():N}";
+        
+        var connectionString = NpgsqlDatabase.CreateConnectionString(_databaseName);
 
         //TODO: Improve connection string
-        _dbContextOptions = new DbContextOptionsBuilder<SampleDbContext>().UseNpgsql($"Data Source = {_databaseName}")
+        _dbContextOptions = new DbContextOptionsBuilder<SampleDbContext>().UseNpgsql(connectionString)
             .Options;
 
-        SqliteDatabase.Make(_databaseName);
+        NpgsqlDatabase.Make(_databaseName);
     }
 
     [IterationCleanup]
     public void DestroyDatabase()
     {
-        SqliteDatabase.Destroy(_databaseName);
+        NpgsqlDatabase.Destroy(_databaseName);
     }
 
     [Benchmark]
@@ -34,7 +36,7 @@ public class NpgsqlEFBenchmark
     {
         using var dbContext = new SampleDbContext(_dbContextOptions);
 
-        var things = dbContext.Things.ToList();
+        var things = dbContext.things.ToList();
 
         foreach (var thing in things)
         {
@@ -49,10 +51,10 @@ public class NpgsqlEFBenchmark
     public void NoTrackingQueryWithInsert()
     {
         using var dbContext = new SampleDbContext(_dbContextOptions);
-
-        var things = dbContext.Things.AsNoTracking()
+    
+        var things = dbContext.things.AsNoTracking()
             .ToList();
-
+    
         foreach (var thing in things)
         {
             var newThing = new Thing
@@ -61,10 +63,10 @@ public class NpgsqlEFBenchmark
                 Value_A = "new!",
                 Value_B = 3
             };
-
-            dbContext.Things.Add(newThing);
+    
+            dbContext.things.Add(newThing);
         }
-
+    
         dbContext.SaveChanges();
     }
 }

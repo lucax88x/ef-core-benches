@@ -32,7 +32,7 @@ public class SqliteEFBenchmark
     {
         using var dbContext = new SampleDbContext(_dbContextOptions);
 
-        var things = dbContext.Things.ToList();
+        var things = dbContext.things.ToList();
 
         foreach (var thing in things)
         {
@@ -48,7 +48,7 @@ public class SqliteEFBenchmark
     {
         using var dbContext = new SampleDbContext(_dbContextOptions);
 
-        var things = dbContext.Things.AsNoTracking().ToList();
+        var things = dbContext.things.AsNoTracking().ToList();
 
         foreach (var thing in things)
         {
@@ -59,7 +59,7 @@ public class SqliteEFBenchmark
                 Value_B = 3
             };
 
-            dbContext.Things.Add(newThing);
+            dbContext.things.Add(newThing);
         }
 
         dbContext.SaveChanges();
